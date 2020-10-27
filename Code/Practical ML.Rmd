@@ -1,0 +1,146 @@
+---
+title: "Practical ML"
+author: "the-eon-flux"
+date: "26/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(caret)
+library(kernlab)
+data(spam)
+```
+
+## `caret` package
+
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+
+
+```
+
+### Data Splitting
+
+* `createDataPartition()` : allows you to split the data easily
+
+```{r pressure, echo=FALSE}
+dim(spam)
+
+inTrain <- createDataPartition(y = spam$type, p = 0.75, list = FALSE)
+        # Train the model with 75% data; p = 0.75
+training <- spam[inTrain,]
+
+testing <- spam[-inTrain,]
+dim(training)
+```
+
+### Fit a model
+
+* `train()` : To fit a model
+
+```{r Train}
+
+set.seed(32343)
+
+modelFit <- train(type ~. , data = training, method = "glm")
+modelFit # Consice summary
+```
+
+```{r Train_1}
+
+# Best model after bootstraping
+modelFit$finalModel
+
+```
+
+### Predictions
+
+```{r Prediction}
+
+predictions <- predict(modelFit, newdata = testing)
+head(predictions)
+
+```
+
+### Confusion Matrix
+
+```{r Model_Comparisons}
+
+Results <- confusionMatrix(predictions, testing$type)
+Results
+```
+
+### Additional data sampling methods : K-fold sampling
+
+* K fold sampling : 
+
+```{r k_fold}
+
+set.seed(73)
+
+# Training set returned
+folds <- createFolds(y = spam$type, k =10, list = TRUE, returnTrain = TRUE)
+sapply(folds, length)
+
+
+```
+
+* For test set
+
+```{r k_fold2}
+
+set.seed(73)
+
+# Testing set returned
+folds <- createFolds(y = spam$type, k =10, list = TRUE, returnTrain = FALSE)
+sapply(folds, length)
+names(folds)
+
+```
+
+
+### Additional data sampling methods : Resampling
+
+* `Resampling` method with replacement
+
+```{r Resampling}
+set.seed(32323)
+folds <- createResample(y = spam$type, times = 10, list = TRUE)
+sapply(folds, length)
+
+```
+
+### Additional data sampling methods : Timeslices resampling
+
+* 
+
+```{r }
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
