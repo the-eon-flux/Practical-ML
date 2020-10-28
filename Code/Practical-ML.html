@@ -369,9 +369,44 @@ summary {
 </div>
 
 
-<div id="caret-package" class="section level2">
-<h2><code>caret</code> package</h2>
-<p>When you click the <strong>Knit</strong> button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:</p>
+<div id="machine-learning-algorithms-in-r" class="section level2">
+<h2>Machine learning algorithms in R</h2>
+<ul>
+<li>Linear discriminant analysis</li>
+<li>Regression</li>
+<li>Naive Bayes</li>
+<li>Support vector machines</li>
+<li>Classification and regression trees</li>
+<li>Random forests</li>
+<li>Boosting</li>
+<li>etc.</li>
+</ul>
+<hr />
+</div>
+<div id="caret-package-functionalities" class="section level2">
+<h2><code>caret</code> package functionalities</h2>
+<ul>
+<li>Some preprocessing (cleaning)
+<ul>
+<li>preProcess</li>
+</ul></li>
+<li>Data splitting
+<ul>
+<li>createDataPartition</li>
+<li>createResample</li>
+<li>createTimeSlices</li>
+</ul></li>
+<li>Training/testing functions
+<ul>
+<li>train</li>
+<li>predict</li>
+</ul></li>
+<li>Model comparison
+<ul>
+<li>confusionMatrix</li>
+</ul></li>
+</ul>
+<hr />
 <div id="data-splitting" class="section level3">
 <h3>Data Splitting</h3>
 <ul>
@@ -406,7 +441,9 @@ modelFit &lt;- train(type ~. , data = training, method = &quot;glm&quot;)</code>
 
 ## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
 
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
+<pre><code>## Warning: glm.fit: algorithm did not converge</code></pre>
+<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
 
 ## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
 
@@ -418,11 +455,9 @@ modelFit &lt;- train(type ~. , data = training, method = &quot;glm&quot;)</code>
 
 ## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
 
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
+<pre><code>## Warning: glm.fit: algorithm did not converge</code></pre>
+<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
 
 ## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
 
@@ -452,7 +487,10 @@ modelFit &lt;- train(type ~. , data = training, method = &quot;glm&quot;)</code>
 ## Resampling results:
 ## 
 ##   Accuracy   Kappa    
-##   0.9209009  0.8335174</code></pre>
+##   0.9219179  0.8359902</code></pre>
+<ul>
+<li>Best model from the bootstraps</li>
+</ul>
 <pre class="r"><code># Best model after bootstraping
 modelFit$finalModel</code></pre>
 <pre><code>## 
@@ -460,81 +498,87 @@ modelFit$finalModel</code></pre>
 ## 
 ## Coefficients:
 ##       (Intercept)               make            address                all  
-##         -1.474918          -0.485851          -0.161147           0.026193  
+##         -1.524183          -0.209285          -0.168210           0.131413  
 ##             num3d                our               over             remove  
-##          1.975434           0.580674           0.658221           1.905850  
+##          1.475490           0.590087           0.725258           2.644885  
 ##          internet              order               mail            receive  
-##          0.492563           0.868901           0.201667           0.017388  
+##          0.962111           0.184330           0.432877          -0.326664  
 ##              will             people             report          addresses  
-##         -0.143391          -0.034058           0.083640           2.135732  
+##         -0.193485          -0.213896          -0.002108           0.716750  
 ##              free           business              email                you  
-##          0.995306           0.919013           0.292001           0.086549  
+##          0.925826           0.835413           0.040597           0.100749  
 ##            credit               your               font             num000  
-##          0.748763           0.216344           0.167640           3.532743  
+##          1.634249           0.160797           0.257894           1.356098  
 ##             money                 hp                hpl             george  
-##          0.738896          -1.740654          -1.696418         -11.298517  
+##          0.523038          -1.903356          -1.219926         -11.967632  
 ##            num650                lab               labs             telnet  
-##          0.415291          -3.659207          -0.358660          -0.117397  
+##          0.234030          -2.181285          -0.414544          -0.170778  
 ##            num857               data             num415              num85  
-##          3.963393          -0.720312           0.636111          -4.042998  
+##          4.317449          -0.633197           0.311716          -2.419619  
 ##        technology            num1999              parts                 pm  
-##          1.036740           0.152491          -0.620802          -0.866677  
+##          0.758069           0.028942          -0.549136          -0.747950  
 ##            direct                 cs            meeting           original  
-##         -0.463369         -50.099631          -2.783306          -0.668750  
+##         -0.238191         -49.008628          -2.653700          -1.726654  
 ##           project                 re                edu              table  
-##         -1.304314          -0.769554          -1.960303          -3.823576  
+##         -2.160388          -0.993146          -1.546657          -1.931821  
 ##        conference      charSemicolon   charRoundbracket  charSquarebracket  
-##         -4.548068          -1.368703          -0.227124          -1.303992  
+##         -5.084551          -1.586427          -0.153727          -1.094013  
 ##   charExclamation         charDollar           charHash         capitalAve  
-##          0.262848           4.253346           2.833412           0.015815  
+##          0.294062           9.119037           1.924775           0.008738  
 ##       capitalLong       capitalTotal  
-##          0.007451           0.001151  
+##          0.009564           0.001061  
 ## 
 ## Degrees of Freedom: 3450 Total (i.e. Null);  3393 Residual
 ## Null Deviance:       4628 
-## Residual Deviance: 1366  AIC: 1482</code></pre>
+## Residual Deviance: 1296  AIC: 1412</code></pre>
 </div>
 <div id="predictions" class="section level3">
 <h3>Predictions</h3>
 <pre class="r"><code>predictions &lt;- predict(modelFit, newdata = testing)
 head(predictions)</code></pre>
-<pre><code>## [1] spam spam spam spam spam spam
+<pre><code>## [1] spam    spam    spam    spam    spam    nonspam
 ## Levels: nonspam spam</code></pre>
 </div>
 <div id="confusion-matrix" class="section level3">
 <h3>Confusion Matrix</h3>
+<ul>
+<li>Shows a contingency table &amp; other summary statistics</li>
+</ul>
 <pre class="r"><code>Results &lt;- confusionMatrix(predictions, testing$type)
 Results</code></pre>
 <pre><code>## Confusion Matrix and Statistics
 ## 
 ##           Reference
 ## Prediction nonspam spam
-##    nonspam     658   46
-##    spam         39  407
-##                                           
-##                Accuracy : 0.9261          
-##                  95% CI : (0.9094, 0.9405)
-##     No Information Rate : 0.6061          
-##     P-Value [Acc &gt; NIR] : &lt;2e-16          
-##                                           
-##                   Kappa : 0.8448          
-##                                           
-##  Mcnemar&#39;s Test P-Value : 0.5152          
-##                                           
-##             Sensitivity : 0.9440          
-##             Specificity : 0.8985          
-##          Pos Pred Value : 0.9347          
-##          Neg Pred Value : 0.9126          
-##              Prevalence : 0.6061          
-##          Detection Rate : 0.5722          
-##    Detection Prevalence : 0.6122          
-##       Balanced Accuracy : 0.9213          
-##                                           
-##        &#39;Positive&#39; Class : nonspam         
+##    nonspam     655   45
+##    spam         42  408
+##                                          
+##                Accuracy : 0.9243         
+##                  95% CI : (0.9075, 0.939)
+##     No Information Rate : 0.6061         
+##     P-Value [Acc &gt; NIR] : &lt;2e-16         
+##                                          
+##                   Kappa : 0.8414         
+##                                          
+##  Mcnemar&#39;s Test P-Value : 0.8302         
+##                                          
+##             Sensitivity : 0.9397         
+##             Specificity : 0.9007         
+##          Pos Pred Value : 0.9357         
+##          Neg Pred Value : 0.9067         
+##              Prevalence : 0.6061         
+##          Detection Rate : 0.5696         
+##    Detection Prevalence : 0.6087         
+##       Balanced Accuracy : 0.9202         
+##                                          
+##        &#39;Positive&#39; Class : nonspam        
 ## </code></pre>
 </div>
-<div id="additional-data-sampling-methods-k-fold-sampling" class="section level3">
-<h3>Additional data sampling methods : K-fold sampling</h3>
+</div>
+<div id="additional-data-sampling-methods" class="section level2">
+<h2>Additional data sampling methods :</h2>
+<div id="k-fold-sampling" class="section level3">
+<h3>K-fold sampling</h3>
 <ul>
 <li>K fold sampling :</li>
 </ul>
@@ -575,9 +619,66 @@ sapply(folds, length)</code></pre>
 <div id="additional-data-sampling-methods-timeslices-resampling" class="section level3">
 <h3>Additional data sampling methods : Timeslices resampling</h3>
 <ul>
-<li></li>
+<li><p>The param <code>initialWindow</code> is for defining the initial number of consecutive values in each training set sample.</p></li>
+<li><p>The param <code>horizon</code> is for defining the initial number of consecutive values in each testing set sample.</p></li>
 </ul>
+<pre class="r"><code>time &lt;- 1:1000
+folds &lt;- createTimeSlices(y = time, initialWindow = 20, horizon = 10)
+
+# Gives training slices
+folds$train[[1]] </code></pre>
+<pre><code>##  [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20</code></pre>
+<pre class="r"><code># Test slices
+folds$test[[1]]</code></pre>
+<pre><code>##  [1] 21 22 23 24 25 26 27 28 29 30</code></pre>
 </div>
+</div>
+<div id="additional-training-methods" class="section level2">
+<h2>Additional training methods :</h2>
+<ul>
+<li><p><code>preProcess</code> param : Set preprocessing options</p></li>
+<li><p><code>weights</code> param : Give weightage (for eg when samples of 1 class are more)</p></li>
+</ul>
+<pre class="r"><code># Default args for train()
+
+function(x, y,
+            method = &quot;rf&quot;,
+            preProcess = NULL,
+            ...,
+            weights = NULL,
+            metric = ifelse(is.factor(y), &quot;Accuracy&quot;, &quot;RMSE&quot;),
+            maximize = ifelse(metric %in% c(&quot;RMSE&quot;, &quot;logLoss&quot;, &quot;MAE&quot;), FALSE, TRUE),
+            trControl = trainControl(),
+            tuneGrid = NULL,
+            tuneLength = ifelse(trControl$method == &quot;none&quot;, 1, 3))</code></pre>
+<ul>
+<li><p><code>metric</code> param : Options</p>
+<pre><code>* Continous outcomes
+      * RMSE = Root mean squared error
+      * RSquared = $R^2$ from Regression models
+* Categorcial outcomes
+      * Accuracy = Fraction of correct
+      * Kappa = Measure of concordance</code></pre></li>
+<li><p>trainControl (<code>trControl</code>) param arguments give you detailed parameter setting options to train models</p>
+<pre><code>* `number` = Bootstrapping count
+* `p` = size of training set
+* `seeds` = Setting seed while doing parallel processing
+* `repeat` = Number of times to repeat subsampling</code></pre></li>
+</ul>
+<pre class="r"><code># args(trainControl)
+
+function (method = &quot;boot&quot;, number = ifelse(grepl(&quot;cv&quot;, 
+    method), 10, 25), repeats = ifelse(grepl(&quot;[d_]cv$&quot;, 
+    method), 1, NA), p = 0.75, search = &quot;grid&quot;, initialWindow = NULL, 
+    horizon = 1, fixedWindow = TRUE, skip = 0, verboseIter = FALSE, 
+    returnData = TRUE, returnResamp = &quot;final&quot;, savePredictions = FALSE, 
+    classProbs = FALSE, summaryFunction = defaultSummary, selectionFunction = &quot;best&quot;, 
+    preProcOptions = list(thresh = 0.95, ICAcomp = 3, k = 5, 
+        freqCut = 95/5, uniqueCut = 10, cutoff = 0.9), sampling = NULL, 
+    index = NULL, indexOut = NULL, indexFinal = NULL, timingSamps = 0, 
+    predictionBounds = rep(FALSE, 2), seeds = NA, adaptive = list(min = 5, 
+        alpha = 0.05, method = &quot;gls&quot;, complete = TRUE), 
+    trim = FALSE, allowParallel = TRUE)</code></pre>
 </div>
 
 
