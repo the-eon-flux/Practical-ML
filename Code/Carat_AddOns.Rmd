@@ -1,0 +1,182 @@
+---
+title: "Additional carat features"
+author: "Tejus"
+date: "31/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2); library(caret); library(gridExtra);
+library(ISLR)
+library(reshape2)
+library(Hmisc)
+```
+
+## Plotting predictors
+
+* `iris` data set gives the measurements in centimeters of the variables sepal length and width and petal length and width, respectively, for 50 flowers from each of 3 species of iris. The species are Iris setosa, versicolor, and virginica.
+
+```{r load_wage}
+data("iris")
+summary(iris)
+```
+
+* Build a model 
+
+```{r training, echo=FALSE}
+
+Train_Index <- createDataPartition(y = iris$Species, p =0.7, list = FALSE)
+train <- iris[Train_Index,]
+test <- iris[-Train_Index,]
+      
+```
+
+### Scatterplot Matrix with *featurePlot* (*caret* package)
+
+#### Scatterplot matrix and factor variables
+
+* Scatterplot with pairs of data
+
+```{r featurePlot, out.width= "120%", out.height="90%"}
+
+featurePlot(x=train[,c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width")],
+            y = train$Species,
+            plot="pairs", 
+            ## Add a key at the top 
+            auto.key = list(columns = 3))
+
+```
+
+
+* Scatterplot with pairs of data and ellipses
+
+
+```{r featurePlot_ellipse, out.width= "120%", out.height="90%"}
+
+featurePlot(x=train[,c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width")],
+            y = train$Species,
+            plot="ellipse", 
+            ## Add a key at the top 
+            auto.key = list(columns = 3))
+
+```
+
+
+* Overlayed Density Plots
+
+```{r featurePlot_density, out.width= "100%"}
+
+featurePlot(x=train[,c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width")],
+            y = train$Species,
+            plot="density", pch = "|", 
+            layout = c(4, 1), adjust = 1.5, 
+            scales = list(y = list(relation="free"),
+                          x = list(relation="free")),
+            ## Add a key at the top 
+            auto.key = list(columns = 3))
+
+```
+
+* Box Plots
+
+```{r featurePlot_box, out.width= "100%", out.height="40%"}
+
+featurePlot(x=train[,c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width")],
+            y = train$Species,
+            plot="box", 
+            layout = c(4, 1), 
+            scales = list(y = list(relation="free"),
+                          x = list(rot=90)),
+            ## Add a key at the top 
+            auto.key = list(columns = 3))
+
+```
+
+
+#### Scatterplot matrix and continous variables
+
+* For regression, the Boston Housing data is used :
+
+* Housing data for 506 census tracts of Boston from the 1970 census. The dataframe `BostonHousing2` the corrected version with additional spatial information.
+
+* The original data are 506 observations on 14 variables, medv (median value of owner-occupied homes in USD 1000's) being the target variable :
+
+```{r BostonHousing, cache=TRUE}
+
+library(mlbench)
+data(BostonHousing2)
+regVar <- c("age", "lstat", "tax")
+str(BostonHousing2[, regVar])
+
+```
+
+* `featurePlot` can be used to create scatter plots of each of the predictors with the outcome.
+
+```{r scatter, out.width="60%"}
+
+theme1 <- trellis.par.get()
+theme1$plot.symbol$col = rgb(.2, .2, .2, .4)
+theme1$plot.symbol$pch = 16
+theme1$plot.line$col = rgb(1, 0, 0, .7)
+theme1$plot.line$lwd <- 2
+trellis.par.set(theme1)
+
+# actual plot
+featurePlot(x = BostonHousing2[, regVar], 
+            y = BostonHousing2$medv, 
+            plot = "scatter",
+            type = c("p", "smooth"),
+            span = .5,
+            layout = c(3, 1))
+
+```
+
+
+### Ggplot2 is always handy with smoothing
+
+```{r }
+
+Boston_Melted <- melt(BostonHousing2[,c(regVar, "medv")], measure.vars = regVar )
+
+g <- ggplot(Boston_Melted, aes(x = value, y = medv)) + geom_point(aes(color = variable)) + facet_grid(.~variable, scales = "free_x") + geom_smooth(method='lm')
+g
+```
+
+
+
+### cut2, making factors (*Hmisc* package)
+
+* Adding factors to variables
+
+```{r cut2,fig.height=4,fig.width=6,cache=TRUE, warning=FALSE}
+
+cutAge <- cut2(BostonHousing2$age,g=3)
+cutLstat <- cut2(BostonHousing2$lstat,g=3)
+cutTax <- cut2(BostonHousing2$tax,g=3)
+
+ExtraFactors <- c(cutAge,  cutLstat, cutTax)
+
+table(cutAge)
+
+```
+
+
+
+### Ggplot for boxplot 
+
+* Boxplot with additional factors in our Regression variables
+
+```{r cutPlots, out.width = "120%" }
+g1 <- qplot(cutAge, medv, data = BostonHousing2, fill = cutAge, geom = c("boxplot"))
+g2 <- qplot(cutTax, medv, data = BostonHousing2, fill = cutTax, geom = c("boxplot"))
+g3 <- qplot(cutLstat, medv, data = BostonHousing2, fill = cutLstat, geom = c("boxplot"))
+
+grid.arrange(g1, g2, g3, ncol = 2)
+```
+
+
+
+
+
+

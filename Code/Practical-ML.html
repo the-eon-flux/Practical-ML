@@ -412,7 +412,17 @@ summary {
 <ul>
 <li><code>createDataPartition()</code> : allows you to split the data easily</li>
 </ul>
+<pre class="r"><code>dim(spam)</code></pre>
 <pre><code>## [1] 4601   58</code></pre>
+<pre class="r"><code>inTrain &lt;- createDataPartition(y = spam$type, p = 0.75, list = FALSE)
+        # Train the model with 75% data; p = 0.75
+
+training &lt;- spam[inTrain,]
+testing &lt;- spam[-inTrain,]
+
+dim(testing)</code></pre>
+<pre><code>## [1] 1150   58</code></pre>
+<pre class="r"><code>dim(training)</code></pre>
 <pre><code>## [1] 3451   58</code></pre>
 </div>
 <div id="fit-a-model" class="section level3">
@@ -421,60 +431,8 @@ summary {
 <li><code>train()</code> : To fit a model</li>
 </ul>
 <pre class="r"><code>set.seed(32343)
-
-modelFit &lt;- train(type ~. , data = training, method = &quot;glm&quot;)</code></pre>
-<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
-<pre><code>## Warning: glm.fit: algorithm did not converge</code></pre>
-<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
-<pre><code>## Warning: glm.fit: algorithm did not converge</code></pre>
-<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-
-## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
-<pre class="r"><code>modelFit # Consice summary</code></pre>
+modelFit &lt;- train(type ~. , data = training, method = &quot;glm&quot;)
+modelFit # Consice summary</code></pre>
 <pre><code>## Generalized Linear Model 
 ## 
 ## 3451 samples
@@ -487,7 +445,7 @@ modelFit &lt;- train(type ~. , data = training, method = &quot;glm&quot;)</code>
 ## Resampling results:
 ## 
 ##   Accuracy   Kappa    
-##   0.9219179  0.8359902</code></pre>
+##   0.9156202  0.8223668</code></pre>
 <ul>
 <li>Best model from the bootstraps</li>
 </ul>
@@ -498,45 +456,45 @@ modelFit$finalModel</code></pre>
 ## 
 ## Coefficients:
 ##       (Intercept)               make            address                all  
-##         -1.524183          -0.209285          -0.168210           0.131413  
+##        -1.484e+00         -1.876e-01         -1.431e-01          1.016e-01  
 ##             num3d                our               over             remove  
-##          1.475490           0.590087           0.725258           2.644885  
+##         2.827e+00          5.502e-01          1.100e+00          2.107e+00  
 ##          internet              order               mail            receive  
-##          0.962111           0.184330           0.432877          -0.326664  
+##         6.197e-01          8.653e-01          1.004e-01         -3.514e-02  
 ##              will             people             report          addresses  
-##         -0.193485          -0.213896          -0.002108           0.716750  
+##        -2.317e-01         -1.757e-01          2.740e-01          1.090e+00  
 ##              free           business              email                you  
-##          0.925826           0.835413           0.040597           0.100749  
+##         1.048e+00          9.503e-01          6.009e-02          8.535e-02  
 ##            credit               your               font             num000  
-##          1.634249           0.160797           0.257894           1.356098  
+##         7.183e-01          2.039e-01          3.408e-01          2.310e+00  
 ##             money                 hp                hpl             george  
-##          0.523038          -1.903356          -1.219926         -11.967632  
+##         5.118e-01         -1.904e+00         -6.936e-01         -1.026e+01  
 ##            num650                lab               labs             telnet  
-##          0.234030          -2.181285          -0.414544          -0.170778  
+##         3.875e-01         -2.771e+00         -7.047e-01         -1.416e-01  
 ##            num857               data             num415              num85  
-##          4.317449          -0.633197           0.311716          -2.419619  
+##         1.405e+00         -1.041e+00          2.085e+00         -1.340e+00  
 ##        technology            num1999              parts                 pm  
-##          0.758069           0.028942          -0.549136          -0.747950  
+##         8.275e-01         -2.559e-02          1.129e+00         -7.407e-01  
 ##            direct                 cs            meeting           original  
-##         -0.238191         -49.008628          -2.653700          -1.726654  
+##        -3.589e-01         -4.170e+01         -3.178e+00         -1.141e+00  
 ##           project                 re                edu              table  
-##         -2.160388          -0.993146          -1.546657          -1.931821  
+##        -1.340e+00         -7.940e-01         -1.563e+00         -2.414e+00  
 ##        conference      charSemicolon   charRoundbracket  charSquarebracket  
-##         -5.084551          -1.586427          -0.153727          -1.094013  
+##        -3.089e+00         -1.577e+00         -6.018e-02         -1.498e+00  
 ##   charExclamation         charDollar           charHash         capitalAve  
-##          0.294062           9.119037           1.924775           0.008738  
+##         2.576e-01          5.836e+00          1.943e+00         -3.364e-03  
 ##       capitalLong       capitalTotal  
-##          0.009564           0.001061  
+##         1.014e-02          7.549e-04  
 ## 
 ## Degrees of Freedom: 3450 Total (i.e. Null);  3393 Residual
 ## Null Deviance:       4628 
-## Residual Deviance: 1296  AIC: 1412</code></pre>
+## Residual Deviance: 1391  AIC: 1507</code></pre>
 </div>
 <div id="predictions" class="section level3">
 <h3>Predictions</h3>
-<pre class="r"><code>predictions &lt;- predict(modelFit, newdata = testing)
+<pre class="r"><code>predictions &lt;- predict(modelFit, newdata = testing) # note for testing data we&#39;re predicting
 head(predictions)</code></pre>
-<pre><code>## [1] spam    spam    spam    spam    spam    nonspam
+<pre><code>## [1] spam    spam    spam    spam    nonspam spam   
 ## Levels: nonspam spam</code></pre>
 </div>
 <div id="confusion-matrix" class="section level3">
@@ -544,43 +502,73 @@ head(predictions)</code></pre>
 <ul>
 <li>Shows a contingency table &amp; other summary statistics</li>
 </ul>
-<pre class="r"><code>Results &lt;- confusionMatrix(predictions, testing$type)
+<pre class="r"><code>Results &lt;- confusionMatrix(predictions, testing$type) # data = data used for prediction
 Results</code></pre>
 <pre><code>## Confusion Matrix and Statistics
 ## 
 ##           Reference
 ## Prediction nonspam spam
-##    nonspam     655   45
-##    spam         42  408
-##                                          
-##                Accuracy : 0.9243         
-##                  95% CI : (0.9075, 0.939)
-##     No Information Rate : 0.6061         
-##     P-Value [Acc &gt; NIR] : &lt;2e-16         
-##                                          
-##                   Kappa : 0.8414         
-##                                          
-##  Mcnemar&#39;s Test P-Value : 0.8302         
-##                                          
-##             Sensitivity : 0.9397         
-##             Specificity : 0.9007         
-##          Pos Pred Value : 0.9357         
-##          Neg Pred Value : 0.9067         
-##              Prevalence : 0.6061         
-##          Detection Rate : 0.5696         
-##    Detection Prevalence : 0.6087         
-##       Balanced Accuracy : 0.9202         
-##                                          
-##        &#39;Positive&#39; Class : nonspam        
+##    nonspam     673   44
+##    spam         24  409
+##                                           
+##                Accuracy : 0.9409          
+##                  95% CI : (0.9256, 0.9538)
+##     No Information Rate : 0.6061          
+##     P-Value [Acc &gt; NIR] : &lt; 2e-16         
+##                                           
+##                   Kappa : 0.8752          
+##                                           
+##  Mcnemar&#39;s Test P-Value : 0.02122         
+##                                           
+##             Sensitivity : 0.9656          
+##             Specificity : 0.9029          
+##          Pos Pred Value : 0.9386          
+##          Neg Pred Value : 0.9446          
+##              Prevalence : 0.6061          
+##          Detection Rate : 0.5852          
+##    Detection Prevalence : 0.6235          
+##       Balanced Accuracy : 0.9342          
+##                                           
+##        &#39;Positive&#39; Class : nonspam         
 ## </code></pre>
 </div>
 </div>
-<div id="additional-data-sampling-methods" class="section level2">
-<h2>Additional data sampling methods :</h2>
-<div id="k-fold-sampling" class="section level3">
-<h3>K-fold sampling</h3>
+<div id="cross-validation" class="section level2">
+<h2>Cross-validation</h2>
 <ul>
-<li>K fold sampling :</li>
+<li><p>Cross-validation is a resampling procedure used to evaluate machine learning models on a limited data sample. Cross-validation is primarily used in applied machine learning to estimate the skill of a machine learning model on unseen data.</p></li>
+<li><p><em>Approach</em>:</p>
+<ol style="list-style-type: decimal">
+<li><p>Use the training set</p></li>
+<li><p>Split it into training/test sets</p></li>
+<li><p>Build a model on the training set</p></li>
+<li><p>Evaluate on the test set</p></li>
+<li><p>Repeat and average the estimated errors</p></li>
+</ol></li>
+<li><p><em>Used for</em>:</p>
+<ol style="list-style-type: decimal">
+<li><p>Picking variables to include in a model</p></li>
+<li><p>Picking the type of prediction function to use</p></li>
+<li><p>Picking the parameters in the prediction function</p></li>
+<li><p>Comparing different predictors</p></li>
+</ol></li>
+</ul>
+<div id="cross-validation-methods-k-fold-cross-validation" class="section level3">
+<h3>Cross validation methods : K-fold cross-validation</h3>
+<ul>
+<li><p><strong>k-fold sampling</strong> is a which procedure has a single parameter called k that refers to the number of groups that a given data sample is to be split into.</p></li>
+<li><p>The general procedure is as follows:</p></li>
+<li><p>Shuffle the dataset randomly.</p></li>
+<li><p>Split the dataset into k groups</p></li>
+<li><p>For each unique group:</p>
+<ol style="list-style-type: decimal">
+<li>Take the group as a hold out or test data set</li>
+<li>Take the remaining groups as a training data set</li>
+<li>Fit a model on the training set and evaluate it on the test set</li>
+<li>Retain the evaluation score and discard the model</li>
+</ol></li>
+<li><p>Summarize the skill of the model using the sample of model evaluation scores.</p></li>
+<li><p>Importantly, each observation in the data sample is assigned to an individual group and stays in that group for the duration of the procedure. This means that each sample is given the opportunity to be used in the hold out set 1 time and used to train the model k-1 times.</p></li>
 </ul>
 <pre class="r"><code>set.seed(73)
 
@@ -599,12 +587,16 @@ folds &lt;- createFolds(y = spam$type, k =10, list = TRUE, returnTrain = FALSE)
 sapply(folds, length)</code></pre>
 <pre><code>## Fold01 Fold02 Fold03 Fold04 Fold05 Fold06 Fold07 Fold08 Fold09 Fold10 
 ##    461    459    461    460    460    460    460    460    461    459</code></pre>
-<pre class="r"><code>names(folds)</code></pre>
-<pre><code>##  [1] &quot;Fold01&quot; &quot;Fold02&quot; &quot;Fold03&quot; &quot;Fold04&quot; &quot;Fold05&quot; &quot;Fold06&quot; &quot;Fold07&quot; &quot;Fold08&quot;
-##  [9] &quot;Fold09&quot; &quot;Fold10&quot;</code></pre>
+<ul>
+<li>Always remember for k-fold cross validation
+<ul>
+<li>Larger k = less bias, more variance</li>
+<li>Smaller k = more bias, less variance</li>
+</ul></li>
+</ul>
 </div>
-<div id="additional-data-sampling-methods-resampling" class="section level3">
-<h3>Additional data sampling methods : Resampling</h3>
+<div id="cross-validation-methods-resampling" class="section level3">
+<h3>Cross validation methods : Resampling</h3>
 <ul>
 <li><code>Resampling</code> method with replacement</li>
 </ul>
@@ -615,10 +607,18 @@ sapply(folds, length)</code></pre>
 ##       4601       4601       4601       4601       4601       4601       4601 
 ## Resample08 Resample09 Resample10 
 ##       4601       4601       4601</code></pre>
-</div>
-<div id="additional-data-sampling-methods-timeslices-resampling" class="section level3">
-<h3>Additional data sampling methods : Timeslices resampling</h3>
 <ul>
+<li>Random sampling with replacement is the <em>bootstrap</em>
+<ul>
+<li>Underestimates of the error</li>
+<li>Can be corrected, but it is complicated (<a href="http://www.jstor.org/discover/10.2307/2965703?uid=2&amp;uid=4&amp;sid=21103054448997">0.632 Bootstrap</a>)</li>
+</ul></li>
+</ul>
+</div>
+<div id="cross-validation-methods-timeslices-resampling" class="section level3">
+<h3>Cross validation methods : Timeslices resampling</h3>
+<ul>
+<li><p>For time series data data must be used in “chunks”. Chunk size is set by below 2 params <code>initialWindow &amp; horizon</code>.</p></li>
 <li><p>The param <code>initialWindow</code> is for defining the initial number of consecutive values in each training set sample.</p></li>
 <li><p>The param <code>horizon</code> is for defining the initial number of consecutive values in each testing set sample.</p></li>
 </ul>
