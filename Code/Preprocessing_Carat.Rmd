@@ -1,0 +1,133 @@
+---
+title: "Preprocessing_Carat"
+author: "Tejus"
+date: "31/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(caret); library(kernlab); data(spam)
+```
+
+## Notes 
+
+* Training and test must be processed in the same way
+* Test transformations will likely be imperfect
+  * Especially if the test/training sets collected at different times
+* Careful when transforming factor variables!
+
+## Standardizing - _preProcess_ function
+
+```{r splitData, cache=TRUE}
+
+#Split the data
+inTrain <- createDataPartition(y=spam$type,
+                              p=0.75, list=FALSE)
+training <- spam[inTrain,]
+testing <- spam[-inTrain,]
+
+```
+
+* For training data
+
+```{r preprocess_Train, cache=TRUE}
+
+# preProcess()
+preObj <- preProcess(training[,-58],method=c("center","scale"))
+trainCapAveS <- predict(preObj,training[,-58])$capitalAve
+
+mean(trainCapAveS) # Ideally( Mean ~ 0 )
+
+sd(trainCapAveS) # Ideally( Sd ~ 1 )
+
+```
+
+* For test data 
+
+```{r preprocess_Test, cache=TRUE}
+
+testCapAveS <- predict(preObj,testing[,-58])$capitalAve
+
+mean(testCapAveS) # Ideally( Mean ~ 0 [supposed to be close])
+
+sd(testCapAveS) # Ideally(Sd ~ 1 [supposed to be close])
+ 
+```
+
+## Standardizing - _preProcess_ argument
+
+```{r ModelFit, cache=TRUE, warning=FALSE}
+set.seed(32343)
+modelFit <- train(type ~.,data=training,
+                  preProcess=c("center","scale"),method="glm")
+modelFit
+```
+
+## Standardizing - Box-Cox transforms
+
+* A Box Cox transformation is a transformation of a non-normal dependent variables into a normal shape. Normality is an important assumption for many statistical techniques. 
+
+* If your data isn't normal, applying a Box-Cox means that you are able to run a broader number of tests.
+
+```{r ,dependson="loadPackage",cache=TRUE,fig.height=3.5,fig.width=7}
+
+preObj <- preProcess(training[,-58],method=c("BoxCox"))
+trainCapAveS <- predict(preObj,training[,-58])$capitalAve
+par(mfrow=c(1,2)); hist(trainCapAveS); qqnorm(trainCapAveS)
+```
+
+## Standardizing - Imputing data
+
+* **k-nearest neighbors imputation** : K-nearest neighbors computation find the k. 
+
+* So if k equal to ten, then we take the 10 nearest, data vectors that look most like data vector with the missing value, and average the values of the variable that's missing and compute them at that position. 
+
+* So, if we do that, then we can predict on our training set, all of the new values, including the ones that have been imputed with the k-nearest imputation algorithm.
+
+```{r knn,cache=TRUE}
+
+set.seed(13343)
+# Make some values NA
+training$capAve <- training$capitalAve
+selectNA <- rbinom(dim(training)[1],size=1,prob=0.05)==1
+training$capAve[selectNA] <- NA
+
+# Impute and standardize
+preObj <- preProcess(training[,-58],method="knnImpute")
+capAve <- predict(preObj,training[,-58])$capAve
+
+# Standardize true values
+capAveTruth <- training$capitalAve
+capAveTruth <- (capAveTruth-mean(capAveTruth))/sd(capAveTruth)
+
+# Results
+quantile(capAve - capAveTruth) # Comparing all imputation predicted values & true values
+quantile((capAve - capAveTruth)[selectNA]) # Comparing imputed values and the true missing values
+quantile((capAve - capAveTruth)[!selectNA])
+
+```
+
+* Most of the differences are zero
+
+* Further readings [Pre-processing ](https://topepo.github.io/caret/pre-processing.html)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
