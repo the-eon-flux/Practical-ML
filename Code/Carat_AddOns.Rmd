@@ -13,6 +13,16 @@ library(reshape2)
 library(Hmisc)
 ```
 
+## Notes 
+
+* Make your plots only in the training set 
+  * Don't use the test set for exploration!
+* Things you should be looking for
+  * Imbalance in outcomes/predictors
+  * Outliers 
+  * Groups of points not explained by a predictor
+  * Skewed variables 
+
 ## Plotting predictors
 
 * `iris` data set gives the measurements in centimeters of the variables sepal length and width and petal length and width, respectively, for 50 flowers from each of 3 species of iris. The species are Iris setosa, versicolor, and virginica.
@@ -22,19 +32,18 @@ data("iris")
 summary(iris)
 ```
 
-* Build a model 
+* **Splitting the data**
 
-```{r training, echo=FALSE}
+```{r training}
 
 Train_Index <- createDataPartition(y = iris$Species, p =0.7, list = FALSE)
 train <- iris[Train_Index,]
-test <- iris[-Train_Index,]
-      
+
 ```
 
 ### Scatterplot Matrix with *featurePlot* (*caret* package)
 
-#### Scatterplot matrix and factor variables
+#### 1.) Scatterplot matrix and factor variables
 
 * Scatterplot with pairs of data
 
@@ -65,12 +74,12 @@ featurePlot(x=train[,c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Wid
 
 * Overlayed Density Plots
 
-```{r featurePlot_density, out.width= "100%"}
+```{r featurePlot_density, out.width= "60%"}
 
 featurePlot(x=train[,c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width")],
             y = train$Species,
             plot="density", pch = "|", 
-            layout = c(4, 1), adjust = 1.5, 
+            layout = c(2, 2), adjust = 1.5, 
             scales = list(y = list(relation="free"),
                           x = list(relation="free")),
             ## Add a key at the top 
@@ -80,12 +89,12 @@ featurePlot(x=train[,c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Wid
 
 * Box Plots
 
-```{r featurePlot_box, out.width= "100%", out.height="40%"}
+```{r featurePlot_box,  out.height="60%"}
 
 featurePlot(x=train[,c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width")],
             y = train$Species,
             plot="box", 
-            layout = c(4, 1), 
+            layout = c(2, 2), 
             scales = list(y = list(relation="free"),
                           x = list(rot=90)),
             ## Add a key at the top 
@@ -94,7 +103,7 @@ featurePlot(x=train[,c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Wid
 ```
 
 
-#### Scatterplot matrix and continous variables
+#### 2.) Scatterplot matrix and continous variables
 
 * For regression, the Boston Housing data is used :
 
@@ -167,7 +176,7 @@ table(cutAge)
 
 * Boxplot with additional factors in our Regression variables
 
-```{r cutPlots, out.width = "120%" }
+```{r cutPlots, out.width = "80%" }
 g1 <- qplot(cutAge, medv, data = BostonHousing2, fill = cutAge, geom = c("boxplot"))
 g2 <- qplot(cutTax, medv, data = BostonHousing2, fill = cutTax, geom = c("boxplot"))
 g3 <- qplot(cutLstat, medv, data = BostonHousing2, fill = cutLstat, geom = c("boxplot"))
