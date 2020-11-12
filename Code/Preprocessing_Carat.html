@@ -390,10 +390,13 @@ testing &lt;- spam[-inTrain,]</code></pre>
 <ul>
 <li>For training data</li>
 </ul>
-<pre class="r"><code># preProcess()
+<pre class="r"><code># preProcess() gives the scaling factor
 preObj &lt;- preProcess(training[,-58],method=c(&quot;center&quot;,&quot;scale&quot;))
+
+# Use predict to get the data matrix for centered &amp; scaled training data
 trainCapAveS &lt;- predict(preObj,training[,-58])$capitalAve
 
+# we will just check the mean and sd for 1 variable
 mean(trainCapAveS) # Ideally( Mean ~ 0 )</code></pre>
 <pre><code>## [1] -7.79374e-18</code></pre>
 <pre class="r"><code>sd(trainCapAveS) # Ideally( Sd ~ 1 )</code></pre>
