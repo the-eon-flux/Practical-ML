@@ -21,10 +21,9 @@ library(ISLR); library(caret); data(Wage);
   * Images: Edges, corners, blobs, ridges ([computer vision feature detection](http://en.wikipedia.org/wiki/Feature_detection_(computer_vision)))
   * Webpages: Number and type of images, position of elements, colors, videos ([A/B Testing](http://en.wikipedia.org/wiki/A/B_testing))
   * People: Height, weight, hair color, sex, country of origin. 
-* The more knowledge of the system you have the better the job you will do. 
+* The more knowledge of the system you have the better the job, you will do. 
 * When in doubt, err on the side of more features
 * Can be automated, but use caution!
-
 
 
 ### 2.) Transforming tidy covariates
@@ -37,25 +36,152 @@ library(ISLR); library(caret); data(Wage);
 
 #### 1.) Convert factor variables to indicator variables (New Dummy Covariate Creation)
 
+* The function *dummyVars* creates a full set of dummy variables
+
 ```{r loadData,cache=TRUE}
 
 inTrain <- createDataPartition(y=Wage$wage,
                               p=0.7, list=FALSE)
 training <- Wage[inTrain,]; testing <- Wage[-inTrain,]
-table(training$jobclass) 
+table(training$jobclass) # our  factor variable to be converted
+
+dummies <- dummyVars(wage ~ jobclass, data = training)
+head(predict(dummies, newdata = training))
+
 ```
 
-* The function *dummyVars* creates a full set of dummy variables
+#### 2.) Removing features with zero variation
+
+* If some variables has no variablitiy; resulting in no direct change in the outcome/result,
+then we can remove that vairable from the prediction.
+
+* *nearZeroVar()_* function diagnoses predictors that have one unique value (i.e. are zero variance predictors) **OR**
+
+* Predictors that have both of the following characteristics: 
+        1. They have very few unique values relative to the number of samples and 
+        2. The ratio of the frequency of the most common value to the frequency of the second most common value is large.
+
 
 ```{r}
-
-
-```
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
+nZero_Predictors <- nearZeroVar(training, saveMetrics = T)
+nZero_Predictors
 
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+* As you can see for the `region` variable; `percentUnique` values are just `4%` also the `freqRatio` is `0`.
+
+* The column `nzv` has the boolean values if they should be removed from the prediction due to their near zero variance.
+
+#### 3.) Adding spline terms
+
+* Using the `bs()` (Basis Fn) from the `splines` library for generating a matrix for a polynomial spline.
+
+* You pass it a single variable & define what degree polynomial you require using the `df` variable.
+
+```{r splines}
+library(splines)
+bsBasis <- bs(training$age, df = 3) # df = 3, indicates 3 columns (age + age^2 + age^3)
+head(bsBasis)
+
+# Plot
+lm1 <- lm(wage ~ bsBasis, data = training)
+plot(training$age, training$wage, pch = 19, cex = 0.5)
+points(training$age, predict(lm1, newdata = training), col = 'red', pch = 19, cex = 0.5)
+
+```
+
+* As you can see in the age v/s wage plot. Curved line better explains the trend
+
+* Splines on the test set. Remember we have to do same modifications (which were done on training data) to test data & hence we use `predict()` with `bsBasis` variable.
+
+
+```{r Splines_test}
+
+New_Age <- predict(bsBasis,age=testing$age)
+head(New_Age)
+
+```
+
+#### 4.) Preprocessing with Principal Components Analysis (PCA)
+
+* Multiple quantitative variables, highly correlated with each other can be summarised into lesser number of variables while capturing most variance.
+
+* A weighted combination of predictors might be better
+* We should pick the combination to capture the "most information" possible
+* Benefits : 
+  * Reduced number of predictors
+  * Reduced noise (due to averaging)
+
+```{r PCA, warning =FALSE}
+library(kernlab); data("spam")
+
+inTrain <- createDataPartition(y = spam$type, p = 0.75, list = FALSE )
+training <- spam[inTrain,]; testing <- spam[!inTrain,]
+
+# Looking at the correlation between variables
+M <- abs(cor(training[,-58]))
+diag(M) <- 0 
+
+t(which(M > 0.8, arr.ind = T))
+
+# just for fun; Lower left hand side has cluster of highly correlated vars
+heatmap(M)
+
+# Names of highly correlated vars
+names(spam)[c(32,34,40)]
+
+# From the plot it's visible that it's a straight doagonal line.
+plot(spam[,c(32,34,40)], main = "Plotting highly correlated vars against each other")
+
+```
+
+* Thus including all these variables may not be completely necessary.  
+
+* 2 related solutions PCA & SVD
+
+__SVD__
+
+If $X$ is a matrix with each variable in a column and each observation in a row then the SVD is a "matrix decomposition"
+
+$$ X = UDV^T$$
+
+where the columns of $U$ are orthogonal (left singular vectors), the columns of $V$ are orthogonal (right singluar vectors) and $D$ is a diagonal matrix (singular values). 
+
+__PCA__
+
+The principal components are equal to the right singular values if you first scale (subtract the mean, divide by the standard deviation) the variables.
+
+```{r PCA_Demo}
+
+smallSpam <- spam[,c(32,34)]
+
+# Get the principal components (right singular vecors of scaled variables)
+pComp <- prcomp(smallSpam)
+plot(pComp$x[,1], pComp$x[,2], main = "PC1 v/s PC2")
+
+```
+
+* 
+
+```{ PCA_Cont}
+
+
+
+```
+## Notes and further reading
+
+* Level 1 feature creation (raw data to covariates)
+  * Science is key. Google "feature extraction for [data type]"
+  * Err on overcreation of features
+  * In some applications (images, voices) automated feature creation is possible/necessary
+    * http://www.cs.nyu.edu/~yann/talks/lecun-ranzato-icml2013.pdf
+* Level 2 feature creation (covariates to new covariates)
+  * The function _preProcess_ in _caret_ will handle some preprocessing.
+  * Create new covariates if you think they will improve fit
+  * Use exploratory analysis on the training set for creating them
+  * Be careful about overfitting!
+* [preprocessing with caret](http://caret.r-forge.r-project.org/preprocess.html)
+* If you want to fit spline models, use the _gam_ method in the _caret_ package which allows smoothing of multiple variables.
+* More on feature creation/data tidying in the Obtaining Data course from the Data Science course track. 
+
+
