@@ -7,7 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE, warning=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-library(ISLR); library(caret); data(Wage);
+library(ISLR); library(caret); data(Wage); library(kernlab); data("spam")
 ```
 
 ## 2 levels of covariate creation
@@ -112,11 +112,10 @@ head(New_Age)
   * Reduced number of predictors
   * Reduced noise (due to averaging)
 
-```{r PCA, warning =FALSE}
-library(kernlab); data("spam")
+```{r PCA, warning =FALSE, cache=TRUE}
 
 inTrain <- createDataPartition(y = spam$type, p = 0.75, list = FALSE )
-training <- spam[inTrain,]; testing <- spam[!inTrain,]
+training <- spam[inTrain,]; testing <- spam[-inTrain,]
 
 # Looking at the correlation between variables
 M <- abs(cor(training[,-58]))
@@ -130,10 +129,14 @@ heatmap(M)
 # Names of highly correlated vars
 names(spam)[c(32,34,40)]
 
-# From the plot it's visible that it's a straight doagonal line.
+```
+
+```{r echo=FALSE}
+# From the plot it's visible that it's a straight diagonal line.
 plot(spam[,c(32,34,40)], main = "Plotting highly correlated vars against each other")
 
 ```
+
 
 * Thus including all these variables may not be completely necessary.  
 
@@ -161,13 +164,75 @@ plot(pComp$x[,1], pComp$x[,2], main = "PC1 v/s PC2")
 
 ```
 
-* 
-
-```{ PCA_Cont}
+* Rotation matrix tells about the scaling factor for each varaible in each of the Principal components
 
 
+```{r PCA_Cont}
+
+pComp$rotation
 
 ```
+
+* __PCA on spam__
+
+```{r spamPCA, cache=TRUE}
+
+MailCol <- ((spam$type == "spam")*1 + 1)
+pComp <- prcomp(log10(spam[,-58]+1))
+
+plot(pComp$x[,1], pComp$x[,2], col=MailCol, xlab="PC1", ylab = "PC2", pch=16)
+
+```
+
+* Now among all the combinations of 57 variables, PC1 represents the combination with highest variance. Also we can see that there is some clear separation explained between red (spam) and black (ham) mails. 
+
+* PCA with __caret__
+
+```{r caretPCA}
+
+preProc <- preProcess(log10(spam[,-58]+1), method = "pca", pcaComp = 3)
+# we have the coefficients for PCs
+
+spamPC <- predict(preProc, newdata= log10(spam[,-58]+1))
+plot(spamPC[,1], spamPC[,2], col=MailCol, xlab="PC1", ylab = "PC2", pch=16)
+
+```
+
+* Fitting a model with the new PCA variables
+
+```{r Fit, warning=FALSE}
+preProc <- preProcess(log10(training[,-58]+1), method ="pca", pcaComp =2)
+trainDataPC <- predict(preProc, newdata= log10(training[,-58]+1))
+modelFit <- train(y =training$type, method = "glm", x = trainDataPC )
+
+# With testing set
+testDataPC <- predict(preProc, newdata = log10(testing[,-58]+1))
+confusionMatrix(testing$type, predict(modelFit, testDataPC))
+
+```
+
+* Direct cmd to skip the predict fn step
+
+```{r train_PCA, cache=TRUE, warning=FALSE}
+
+modelFit <- train(y =training$type, method ="glm", preProcess="pca", x =training[,-58])
+confusionMatrix(testing$type, predict(modelFit, testing))
+
+```
+
+#### Final thoughts on PCs
+
+* Most useful for linear-type models
+* Can make it harder to interpret predictors
+* Watch out for outliers! 
+  * Transform first (with logs/Box Cox)
+  * Plot predictors to identify problems
+* For more info see 
+  * Exploratory Data Analysis course notes
+  * [Elements of Statistical Learning](http://statweb.stanford.edu/~tibs/ElemStatLearn/)
+
+----
+
 ## Notes and further reading
 
 * Level 1 feature creation (raw data to covariates)
@@ -180,7 +245,7 @@ plot(pComp$x[,1], pComp$x[,2], main = "PC1 v/s PC2")
   * Create new covariates if you think they will improve fit
   * Use exploratory analysis on the training set for creating them
   * Be careful about overfitting!
-* [preprocessing with caret](http://caret.r-forge.r-project.org/preprocess.html)
+* [Preprocessing with caret](http://caret.r-forge.r-project.org/preprocess.html)
 * If you want to fit spline models, use the _gam_ method in the _caret_ package which allows smoothing of multiple variables.
 * More on feature creation/data tidying in the Obtaining Data course from the Data Science course track. 
 
