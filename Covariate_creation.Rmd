@@ -1,0 +1,56 @@
+---
+title: "Covariate Creation"
+author: "Tejus"
+date: "01/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ISLR); library(caret); data(Wage);
+```
+
+## 2 levels of covariate creation
+
+### 1.)  From raw data to covariate
+
+* Depends heavily on application
+* The balancing act is summarization vs. information loss
+* Examples:
+  * Text files: frequency of words, frequency of phrases ([Google ngrams](https://books.google.com/ngrams)), frequency of capital letters.
+  * Images: Edges, corners, blobs, ridges ([computer vision feature detection](http://en.wikipedia.org/wiki/Feature_detection_(computer_vision)))
+  * Webpages: Number and type of images, position of elements, colors, videos ([A/B Testing](http://en.wikipedia.org/wiki/A/B_testing))
+  * People: Height, weight, hair color, sex, country of origin. 
+* The more knowledge of the system you have the better the job you will do. 
+* When in doubt, err on the side of more features
+* Can be automated, but use caution!
+
+
+
+### 2.) Transforming tidy covariates
+
+* More necessary for some methods (regression, svms) than for others (classification trees).
+* **Note :** Should be done _only on the training set_
+* The best approach is through exploratory analysis (plotting/tables)
+* New covariates should be added to data frames
+* Some common ways are :
+
+#### 1.) Convert factor variables to indicator variables
+
+```{r loadData,cache=TRUE}
+
+inTrain <- createDataPartition(y=Wage$wage,
+                              p=0.7, list=FALSE)
+training <- Wage[inTrain,]; testing <- Wage[-inTrain,]
+```
+
+
+
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
