@@ -35,17 +35,22 @@ library(ISLR); library(caret); data(Wage);
 * New covariates should be added to data frames
 * Some common ways are :
 
-#### 1.) Convert factor variables to indicator variables
+#### 1.) Convert factor variables to indicator variables (New Dummy Covariate Creation)
 
 ```{r loadData,cache=TRUE}
 
 inTrain <- createDataPartition(y=Wage$wage,
                               p=0.7, list=FALSE)
 training <- Wage[inTrain,]; testing <- Wage[-inTrain,]
+table(training$jobclass) 
 ```
 
+* The function *dummyVars* creates a full set of dummy variables
+
+```{r}
 
 
+```
 
 You can also embed plots, for example:
 
