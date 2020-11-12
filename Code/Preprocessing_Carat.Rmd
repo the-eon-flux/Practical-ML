@@ -33,12 +33,14 @@ testing <- spam[-inTrain,]
 
 ```{r preprocess_Train, cache=TRUE}
 
-# preProcess()
+# preProcess() gives the scaling factor
 preObj <- preProcess(training[,-58],method=c("center","scale"))
+
+# Use predict to get the data matrix for centered & scaled training data
 trainCapAveS <- predict(preObj,training[,-58])$capitalAve
 
+# we will just check the mean and sd for 1 variable
 mean(trainCapAveS) # Ideally( Mean ~ 0 )
-
 sd(trainCapAveS) # Ideally( Sd ~ 1 )
 
 ```
