@@ -1,0 +1,176 @@
+---
+title: "Prediction with classfication algorithms"
+author: "Tejus"
+date: "13/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Key ideas while predicting with Trees
+
+* Iteratively split variables into groups
+* Evaluate "homogeneity" within each group
+* Split again if necessary
+
+__Pros__:
+
+* Easy to interpret
+* Better performance in nonlinear settings
+
+__Cons__:
+
+* Without pruning/cross-validation can lead to overfitting
+* Harder to estimate uncertainty
+* Results may be variable
+
+## Basic algorithm
+
+1. Start with all variables in one group
+2. Find the variable/split that best separates the outcomes
+3. Divide the data into two groups ("leaves") on that split ("node")
+4. Within each split, find the best variable/split that separates the outcomes
+5. Continue until the groups are too small or sufficiently "pure"
+
+## Measures of impurity
+
+$$\hat{p}_{mk} = \frac{1}{N_m}\sum_{x_i\; in \; Leaf \; m}\mathbb{1}(y_i = k)$$
+
+__Misclassification Error__: 
+
+
+* 0 = perfect purity
+* 0.5 = no purity
+
+$$ 1 - \hat{p}_{m k(m)}; k(m) = {\rm most; common; k}$$ 
+
+__Gini index__:
+
+* 0 = perfect purity
+* 0.5 = no purity
+
+$$ \sum_{k \neq k'} \hat{p}_{mk} \times \hat{p}_{mk'} = \sum_{k=1}^K \hat{p}_{mk}(1-\hat{p}_{mk}) = 1 - \sum_{k=1}^K p_{mk}^2$$
+
+
+
+__Deviance ($log_e$) /information ($log_2$) gain__:
+
+$$ -\sum_{k=1}^K \hat{p}_{mk} \log_2\hat{p}_{mk} $$
+* 0 = perfect purity
+* 1 = no purity
+
+
+http://en.wikipedia.org/wiki/Decision_tree_learning
+
+## Example : Measures of impurity
+
+
+```{r leftplot,echo=FALSE,fig.align="center"}
+library(flexdashboard)
+par(mfrow=c(1,2))
+x = rep(1:4,each=4); y = rep(1:4,4)
+plot(x,y,xaxt="n",yaxt="n",cex=3,col=c(rep("blue",15),rep("red",1)),pch=19, main = "Leaf A")
+plot(x,y,xaxt="n",yaxt="n",cex=3,col=c(rep("blue",8),rep("red",8)),pch=19, main = "Leaf B")
+```
+
+
+### Leaf A
+
+* __Misclassification:__ $1/16 = 0.06$  
+* __Gini:__ $1 - [(1/16)^2 + (15/16)^2] = 0.12$ 
+* __Information:__$-[1/16 \times log2(1/16) + 15/16 \times log2(15/16)] = 0.34$
+
+### Leaf B
+
+* __Misclassification:__ $8/16 = 0.5$
+* __Gini:__ $1 - [(8/16)^2 + (8/16)^2] = 0.5$
+* __Information:__$-[1/16 \times log2(1/16) + 15/16 \times log2(15/16)] = 1$
+
+
+## Example: Iris Data
+
+* It would be relatively harder to identify the species with a regression model than with a decision tree model
+
+```{r fig.height=4,fig.width=6, echo=FALSE}
+library(ggplot2)
+qplot(Petal.Width,Sepal.Width,colour=Species,data=iris)
+```
+
+
+* Creating training & testing data
+
+```{r iris, cache=TRUE, warning=FALSE}
+data(iris);  library(caret)
+names(iris)
+
+inTrain <- createDataPartition(y=iris$Species,
+                              p=0.7, list=FALSE)
+training <- iris[inTrain,]
+testing <- iris[-inTrain,]
+
+```
+
+* Model fitting
+
+```{r rpart}
+modFit <- train(Species~., data=training, method = "rpart") # rpart : R's pckg for partition trees
+print(modFit$finalModel)
+```
+
+* Plot the classification tree
+
+```{r modelTree}
+plot(modFit$finalModel, uniform = T, main= "Classification tree")
+text(modFit$finalModel, use.n = T, all = T, cex = 0.8)
+```
+
+* Prettier plot using `rattle pckg`
+
+```{r Rattle, cache=TRUE, warning=FALSE}
+library(rattle)
+fancyRpartPlot(modFit$finalModel, palettes=c("Greys", "Blues"))
+```
+
+## Prediction
+
+```{r prediction}
+predict(modFit, testing[,-5])
+```
+
+* Output is class label
+
+## Notes and further resources
+
+* Classification trees are non-linear models
+  * They use interactions between variables
+  * Data transformations may be less important (monotone transformations)
+  * Trees can also be used for regression problems (continuous outcome)
+* Note that there are multiple tree building options
+in R both in the caret package - [party](http://cran.r-project.org/web/packages/party/index.html), [rpart](http://cran.r-project.org/web/packages/rpart/index.html) and out of the caret package - [tree](http://cran.r-project.org/web/packages/tree/index.html)
+* [Introduction to statistical learning](http://www-bcf.usc.edu/~gareth/ISL/)
+* [Elements of Statistical Learning](http://www-stat.stanford.edu/~tibs/ElemStatLearn/)
+* [Classification and regression trees](http://www.amazon.com/Classification-Regression-Trees-Leo-Breiman/dp/0412048418)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
