@@ -87,6 +87,9 @@
       
 # Q4
       # load data
+      library(caret)
+      library(AppliedPredictiveModeling)
+      
       set.seed(3433)
       data(AlzheimerDisease)
       adData = data.frame(diagnosis,predictors)
@@ -102,14 +105,8 @@
       MainCol <- ((training$diagnosis == "Impaired")*1+1)
       prComponents <- preProcess(training[,ILs], method = "pca",thresh = 0.9)
       trainPC <- predict(prComponents, newdata = training[,ILs])
-      
-      # Calculate the number of principal components needed to capture 90% of the variance. How many are there?
-      
-      Var <- apply(trainPC, 2, var)
-      Var / sum(Var) # Gives % variance explained by each PCs
-      cumsum(Var / sum(Var))
-      # Ans for 90% : 9
-      # Ans for 80% : 7
+      names(trainPC)
+ 
       
 # Q5
       # Create a training data set consisting of only the predictors with variable names beginning with IL and the diagnosis. 
@@ -119,7 +116,7 @@
       fit <- train(y = newTrain$diagnosis, x = newTrain[,-1], method = "glm")
       
       # PCA fit
-      prComponents <- preProcess(newTrain[,-1], method = "pca",thresh = 0.9)
+      prComponents <- preProcess(newTrain[,-1], method = "pca",thresh = 0.8)
       trainPC <- predict(prComponents, newdata = newTrain[,-1])
       
       Var <- apply(trainPC, 2, var)
@@ -139,6 +136,6 @@
       '     Model Coursera  for_me
             fit   0.72  0.75
             PCfit 0.71  0.719
-            
-            Ans : same accuracy 80% PCs
+            Ans is  :  65 & 72 for 80%
+            Ans : not same accuracy or 91 & 93 for 80% PCs
       '

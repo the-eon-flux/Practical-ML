@@ -1,0 +1,156 @@
+---
+title: "Random Forests & Boosting"
+author: "Tejus"
+date: "13/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(caret)
+library(randomForest)
+library(rattle)
+set.seed(143)
+```
+
+* `Random forests & Boosting` are usually one of the two top performing algorithms along with boosting in prediction contests.
+
+### 1.) Random forests
+
+1. Bootstrap samples (kind of like extension of bagging with classfication algorithm)
+2. At each split, there is addional bootstrapping of variables
+3. Grow multiple trees and vote
+
+__Pros__:
+
+1. Accuracy
+
+__Cons__:
+
+1. Speed
+2. Interpretability
+3. Overfitting
+
+#### Iris data
+
+```{r iris, cache=TRUE}
+data(iris); library(ggplot2)
+inTrain <- createDataPartition(y=iris$Species,
+                              p=0.7, list=FALSE)
+training <- iris[inTrain,]
+testing <- iris[-inTrain,]
+
+# Random Forest
+modFit <- train(Species~ .,data=training,method="rf",prox=TRUE)
+modFit
+```
+
+* Get a single tree
+
+```{r Iris_Forest1}
+# k = 2 gives second tree
+getTree(modFit$finalModel,k=2)
+```
+
+#### Class "centers" ; Gives us the center of each class label
+
+```{r centers}
+irisP <- classCenter(training[,c(3,4)], training$Species, modFit$finalModel$prox)
+irisP <- as.data.frame(irisP); irisP$Species <- rownames(irisP)
+p <- qplot(Petal.Width, Petal.Length, col=Species,data=training)
+p + geom_point(aes(x=Petal.Width,y=Petal.Length,col=Species),size=5,shape=4,data=irisP)
+```
+
+* Each of the `X` marks are the centers for each `species`
+
+#### Predicting new values
+
+```{r predForest, dependson="centers",fig.height=4,fig.width=4,cache=TRUE}
+pred <- predict(modFit,testing)
+table(pred,testing$Species)
+```
+
+* The 4 missed points were
+
+```{r MissedRfPts}
+testing$predRight <- pred==testing$Species
+qplot(Petal.Width,Petal.Length,colour=predRight,data=testing,main="newdata Predictions")
+
+```
+
+
+#### Notes and further resources
+
+__Notes__:
+
+* Random forests are usually one of the two top
+performing algorithms along with boosting in prediction contests.
+* Random forests are difficult to interpret but often very accurate. 
+* Care should be taken to avoid overfitting (see [rfcv](http://cran.r-project.org/web/packages/randomForest/randomForest.pdf) funtion)
+
+
+__Further resources__:
+
+* [Random forests](http://www.stat.berkeley.edu/~breiman/RandomForests/cc_home.htm)
+* [Random forest Wikipedia](http://en.wikipedia.org/wiki/Random_forest)
+* [Elements of Statistical Learning](http://www-stat.stanford.edu/~tibs/ElemStatLearn/)
+
+
+### 2.) Boosting
+
+* Basic idea is that 
+      1. take lots of (possibly) weak predictors
+      2. Weight them and add them up
+      3. Get a stronger predictor
+
+#### Boosting in R 
+
+* Boosting can be used with any subset of classifiers
+* One large subclass is [gradient boosting](http://en.wikipedia.org/wiki/Gradient_boosting)
+* R has multiple boosting libraries. Differences include the choice of basic classification functions and combination rules.
+  * [gbm](http://cran.r-project.org/web/packages/gbm/index.html) - boosting with trees.
+  * [mboost](http://cran.r-project.org/web/packages/mboost/index.html) - model based boosting
+  * [ada](http://cran.r-project.org/web/packages/ada/index.html) - statistical boosting based on [additive logistic regression](http://projecteuclid.org/DPubS?service=UI&version=1.0&verb=Display&handle=euclid.aos/1016218223)
+  * [gamBoost](http://cran.r-project.org/web/packages/GAMBoost/index.html) for boosting generalized additive models
+* Most of these are available in the caret package 
+
+#### Wage example
+
+```{r wage, cache=TRUE, warning=FALSE}
+library(ISLR); data(Wage); library(ggplot2); library(caret);
+
+Wage <- subset(Wage,select=-c(logwage))
+inTrain <- createDataPartition(y=Wage$wage,
+                              p=0.7, list=FALSE)
+training <- Wage[inTrain,]; testing <- Wage[-inTrain,]
+
+# model fit
+modFit <- train(wage ~ ., method="gbm",data=training,verbose=FALSE)
+print(modFit)
+```
+
+
+* Quick plot to show results
+
+```{r gbmPlot}
+
+qplot(predict(modFit,testing),wage,data=testing)
+
+```
+
+* They're mostly on diagonal axis, although it's clear that not all variance is explained.
+
+#### Notes and further reading
+
+* A couple of nice tutorials for boosting
+  * Freund and Shapire - [http://www.cc.gatech.edu/~thad/6601-gradAI-fall2013/boosting.pdf](http://www.cc.gatech.edu/~thad/6601-gradAI-fall2013/boosting.pdf)
+  * Ron Meir- [http://webee.technion.ac.il/people/rmeir/BoostingTutorial.pdf](http://webee.technion.ac.il/people/rmeir/BoostingTutorial.pdf)
+* Boosting, random forests, and model ensembling are the most common tools that win Kaggle and other prediction contests. 
+  * [http://www.netflixprize.com/assets/GrandPrize2009_BPC_BigChaos.pdf](http://www.netflixprize.com/assets/GrandPrize2009_BPC_BigChaos.pdf)
+  * [https://kaggle2.blob.core.windows.net/wiki-files/327/09ccf652-8c1c-4a3d-b979-ce2369c985e4/Willem%20Mestrom%20-%20Milestone%201%20Description%20V2%202.pdf](https://kaggle2.blob.core.windows.net/wiki-files/327/09ccf652-8c1c-4a3d-b979-ce2369c985e4/Willem%20Mestrom%20-%20Milestone%201%20Description%20V2%202.pdf)
+  
+
+
+
+
+
