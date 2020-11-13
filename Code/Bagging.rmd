@@ -1,0 +1,105 @@
+---
+title: "Bootstrap Aggregating [ Bagging ]"
+author: "Tejus"
+date: "13/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(caret)
+```
+
+## Bootstrap aggregating (bagging)
+
+__Basic idea__: 
+
+1. Resample cases and recalculate predictions
+2. Average or majority vote
+
+__Notes__:
+
+* Similar bias 
+* Reduced variance
+* More useful for non-linear functions
+
+## Ozone data
+
+```{r ozoneData, cache=TRUE}
+load("./Data/ozone.RData")
+ozone <- ozone[order(ozone$ozone),]
+head(ozone)
+
+```
+
+* Predicting temperature as a function of Ozone
+
+```{r aggregatingLoess, cache=TRUE, warning=FALSE}
+
+ll = matrix(NA, ncol = 155, nrow = 10)
+for (i in 1:nrow(ll)) {
+      Resample <- sample(1:dim(ozone)[1], replace = T)
+      New_Ozone <- ozone[Resample,]; New_Ozone <- New_Ozone[order(New_Ozone$ozone),]
+      loess0 <- loess(temperature ~ ozone, data = New_Ozone, span = 0.2)
+      ll[i,] <- predict(loess0, newdata = data.frame(ozone=1:155))
+}
+
+plot(ozone$ozone,ozone$temperature,pch=19,cex=0.5)
+for(i in 1:10){lines(1:155,ll[i,],col="grey",lwd=2)}
+lines(1:155,apply(ll,2,mean),col="red",lwd=2)
+
+```
+
+
+* So basically the red line is the average `Loess` curve, thus with the same data (resampled of course) we get same bias but less variance due to averaging
+
+## Bagging in caret
+
+* Some models perform bagging for you, in `train` function consider `method` options 
+  * `bagEarth` 
+  * `treebag`
+  * `bagFDA`
+* Alternatively you can bag any model you choose using the `bag` function
+
+## Custom bagging in caret
+
+```{r bag1, cache=TRUE}
+set.seed(143)
+predictors = data.frame(ozone=ozone$ozone) # Predictor Df
+temperature = ozone$temperature     # Y variable 
+treebag <- bag(predictors, temperature, B = 10,
+                bagControl = bagControl(fit = ctreeBag$fit,
+                                        predict = ctreeBag$pred,
+                                        aggregate = ctreeBag$aggregate))
+# Plot to show the bagging
+plot(ozone$ozone,temperature,col='lightgrey',pch=16, cex=0.6, main = "Custom bagging", xlab = "Ozone", ylab = "Temperature")
+points(ozone$ozone,predict(treebag$fits[[1]]$fit,predictors),pch=19,col="red") # Default 1 fit model
+points(ozone$ozone,predict(treebag,predictors),pch=19,col="dodgerblue") # Bagged fit model
+
+```
+
+
+* You can see that the slanting trend between `Temperature` variable `70 - 80` was evidently well captured by the bagged model fit (`blue`).
+
+* `ctreeBag$fit` : A function in `caret` pckg for building a `Conditional Tree` model
+* `ctreeBag$pred` : Returns the prediction for a newdata using the above `ctree` model
+* `ctreeBag$aggregate` : Aggregates the models built from resampled data
+
+* Other models can be used in the above `bag()` function also.
+
+
+## Notes and further resources
+
+__Notes__:
+
+* Bagging is most useful for nonlinear models
+* Often used with trees - an extension is random forests
+* Several models use bagging in caret's _train_ function
+
+__Further resources__:
+
+* [Bagging](http://en.wikipedia.org/wiki/Bootstrap_aggregating)
+* [Bagging and boosting](http://stat.ethz.ch/education/semesters/FS_2008/CompStat/sk-ch8.pdf)
+* [Elements of Statistical Learning](http://www-stat.stanford.edu/~tibs/ElemStatLearn/)
+
+
