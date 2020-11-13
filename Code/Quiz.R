@@ -76,14 +76,14 @@
       g
             # Perfect explanation by age
       
-      # Ans : Non-random pattern in the plot of outcome v/s index ; perfectly explained by FlyAsh
+      # Ans : Non-random pattern in the plot of outcome v/s index ; no var can perfectly explain it
       
       
 # Q3
       #  Make a histogram and confirm the SuperPlasticizer variable is skewed.
       qplot(data = training, x =Superplasticizer, bins = 40 )
       
-      # Ans : Large no. of values are same & even if we take log(value+1) they'd be identical & dist be asymmetric       
+      # Ans : Large no. of Values are 0, thus log gives -inf
       
 # Q4
       # load data
@@ -113,29 +113,20 @@
       newTrain <- training[,c("diagnosis",ILs)]; newTest <- testing[,c("diagnosis",ILs)]
   
       # normal fit
-      fit <- train(y = newTrain$diagnosis, x = newTrain[,-1], method = "glm")
+      fit <- train(y = newTrain$diagnosis, x = newTrain[,-1], preProcess=c("center","scale"),method = "glm")
       
       # PCA fit
       prComponents <- preProcess(newTrain[,-1], method = "pca",thresh = 0.8)
       trainPC <- predict(prComponents, newdata = newTrain[,-1])
-      
-      Var <- apply(trainPC, 2, var)
-      Var / sum(Var) # Gives % variance explained by each PCs
-      cumsum(Var / sum(Var))
-      # First 6 PC's cover 80% variance
       PCfit <- train(y = newTrain$diagnosis, x =trainPC, method = "glm")
 
       # Testing
-            
       confusionMatrix(newTest$diagnosis, predict(fit, newTest[,-1])) # normal fit res
       
       testPC <- predict(prComponents, newdata = newTest[,-1])
       confusionMatrix(newTest$diagnosis, predict(PCfit, newdata = testPC)) # PC fit res
 
       
-      '     Model Coursera  for_me
-            fit   0.72  0.75
-            PCfit 0.71  0.719
-            Ans is  :  65 & 72 for 80%
-            Ans : not same accuracy or 91 & 93 for 80% PCs
-      '
+      ' Ans  :  Non-PCA Accuracy: 0.65; PCA Accuracy: 0.72. for 80% '
+      
+      
