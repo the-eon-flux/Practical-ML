@@ -1,0 +1,44 @@
+---
+title: "Regularised Regression"
+author: "Tejus"
+date: "14/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Basic idea
+
+1. Fit a regression model
+2. Penalize (or shrink) large coefficients
+
+__Pros:__
+
+* Can help with the bias/variance tradeoff. Remember from our classes of multivariate regression :    
+            a. **Omitting variables results in bias in the coefficients of interest - unless their regressors are uncorrelated with the omitted ones.**  
+            b. **On the other hand, including any new variables increases (actual, not estimated) standard errors of other regressors. (So we don't want to idly throw variables into the model. )**
+
+* Can help with model selection
+
+__Cons:__
+
+* May be computationally demanding on large data sets
+* Does not perform as well as random forests and boosting
+
+### A motivating example
+
+* Consider a model 
+
+$$Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \epsilon$$
+
+where $X_1$ and $X_2$ are nearly perfectly correlated (co-linear). You can approximate this model by:
+
+$$Y = \beta_0 + (\beta_1 + \beta_2)X_1 + \epsilon$$
+
+The result is:
+
+* You will get a good estimate of $Y$
+* The estimate (of $Y$) will be biased 
+* We may reduce variance in the estimate
