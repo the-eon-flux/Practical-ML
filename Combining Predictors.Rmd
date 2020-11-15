@@ -1,0 +1,59 @@
+---
+title: "Combining Predictors"
+author: "Tejus"
+date: "15/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ISLR); data(Wage); library(ggplot2); library(caret);
+```
+
+
+### Key ideas
+
+* You can combine different classifiers by averaging/voting (Boosting classfier + RF + lm)
+* Combining classifiers improves accuracy but reduces interpretability
+* Boosting, bagging, and random forests are variants on this theme with same classfier used
+
+### Basic intuition - majority vote
+
+Suppose we have 5 completely independent classifiers
+
+If accuracy is 70% for each:
+
+  * $10\times(0.7)^3(0.3)^2 + 5\times(0.7)^4(0.3)^2 + (0.7)^5$
+  * 83.7% majority vote accuracy
+
+With 101 independent classifiers
+  * 99.9% majority vote accuracy
+  
+
+### Approaches for combining classifiers
+
+1. Bagging, boosting, random forests
+  * Usually combine similar classifiers
+2. Combining different classifiers
+  * Model stacking
+  * Model ensembling
+
+### Model Stacking 
+
+
+* Example with Wage data
+
+__Create training, test and validation sets__
+
+```{r wage, cache=TRUE}
+
+Wage <- subset(Wage,select=-c(logwage))
+# Create a building data set and validation set
+inBuild <- createDataPartition(y=Wage$wage,
+                              p=0.7, list=FALSE)
+validation <- Wage[-inBuild,]; buildData <- Wage[inBuild,]
+inTrain <- createDataPartition(y=buildData$wage,
+                              p=0.7, list=FALSE)
+training <- buildData[inTrain,]; testing <- buildData[-inTrain,]
+```
+
