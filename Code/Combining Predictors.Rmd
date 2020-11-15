@@ -29,6 +29,7 @@ If accuracy is 70% for each:
 With 101 independent classifiers
   * 99.9% majority vote accuracy
   
+Math explained [here](https://github.com/lgreski/datasciencectacontent/blob/master/markdown/pml-combiningPredictorsBinomial.md)  
 
 ### Approaches for combining classifiers
 

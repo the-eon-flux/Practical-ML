@@ -7,24 +7,115 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(quantmod); library(forecast)
 ```
 
-## R Markdown
+### What is different?
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+* Data are dependent over time
+* Specific pattern types
+  * Trends - long term increase or decrease
+  * Seasonal patterns - patterns related to time of week, month, year, etc.
+  * Cycles - patterns that rise and fall periodically
+* Subsampling into training/test is more complicated
+* Similar issues arise in spatial data 
+  * Dependency between nearby observations
+  * Location specific effects
+* Typically goal is to predict one or more observations into the future. 
+* All standard predictions can be used (with caution!)
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+#### Things to remember
 
-```{r cars}
-summary(cars)
+* Beware spurious correlations!
+
+* Beware extrapolation!
+
+
+### Forecasting with Yahoo data
+
+```{r loadGOOG, cache=TRUE}
+
+from.dat <- as.Date("01/01/08", format="%m/%d/%y")
+to.dat <- as.Date("12/31/13", format="%m/%d/%y")
+getSymbols("GOOG", src="yahoo", from = from.dat, to = to.dat)
+head(GOOG)
 ```
 
-## Including Plots
+* Summarise 
 
-You can also embed plots, for example:
+```{r TimeSeries, cache=TRUE}
+mGoog <- to.monthly(GOOG)
+googOpen <- Op(mGoog)
+ts1 <- ts(googOpen,frequency=12)
+plot(ts1,xlab="Years+1", ylab="GOOG")
 
-```{r pressure, echo=FALSE}
-plot(pressure)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+#### Examples of time series decomposition
+
+* __Trend__  - Consistently increasing pattern over time 
+* __Seasonal__ -  When there is a pattern over a fixed period of time that recurs.
+* __Cyclic__ -  When data rises and falls over non fixed periods
+
+[Otexts](https://www.otexts.org/fpp/6/1)
+
+
+```{r Decompose, cache=TRUE}
+plot(decompose(ts1),xlab="Years+1")
+```
+
+#### Training and test sets
+
+* Have to build sets with consecutive time points
+
+```{r trainingTest,dependson="tseries",fig.height=4.5,fig.width=4.5}
+ts1Train <- window(ts1,start=1,end=5)
+ts1Test <- window(ts1,start=5,end=(7-0.01))
+ts1Train
+```
+
+### Forecasting with simple moving average
+
+$$ Y_{t}=\frac{1}{2*k+1}\sum_{j=-k}^k {y_{t+j}}$$
+
+```{r Algs,fig.height=4.5,fig.width=4.5}
+plot(ts1Train)
+lines(ma(ts1Train,order=3),col="red")
+```
+
+* Prediction will be an average of the previous time points out to a particular time.
+
+### Exponential smoothing
+
+* Weight nearby time points with higher values than those that are far.
+
+__Example - simple exponential smoothing__
+$$\hat{y}_{t+1} = \alpha y_t + (1-\alpha)\hat{y}_{t-1}$$
+
+* Different classes to choose from
+
+<img class=center src=./Assets/expsmooth.png height=300>
+
+```{r SES_Eg}
+ets1 <- ets(ts1Train,model="MMM")
+fcast <- forecast(ets1)
+# You get prediction bounds also
+plot(fcast); lines(ts1Test,col="red")
+
+## For Accuracy 
+accuracy(fcast,ts1Test)
+
+```
+
+
+### Notes and further resources
+
+* [Forecasting and timeseries prediction](http://en.wikipedia.org/wiki/Forecasting) is an entire field
+* Rob Hyndman's [Forecasting: principles and practice](https://www.otexts.org/fpp/) is a good place to start
+* Cautions
+  * Be wary of spurious correlations
+  * Be careful how far you predict (extrapolation)
+  * Be wary of dependencies over time
+* See [quantmod](http://cran.r-project.org/web/packages/quantmod/quantmod.pdf) or [quandl](http://www.quandl.com/help/packages/r) packages for finance-related problems.
+
+
